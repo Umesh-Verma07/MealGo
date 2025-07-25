@@ -3,6 +3,8 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import Card from '../components/Card'
 
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+
 export default function Home() {
 
     const [foodCat, setFoodCat] = useState([])
@@ -10,7 +12,7 @@ export default function Home() {
     const [search, setSearch] = useState("")
 
     const localData = async () => {
-        let response = await fetch("http://localhost:5001/api/foodData", {
+        let response = await fetch(`${SERVER_URL}/api/foodData`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 export default function Register() {
 
     const navigate = useNavigate();
@@ -11,7 +11,7 @@ export default function Register() {
     const handleSubmit = async (e) => {
 
         e.preventDefault();
-        const response = await fetch("http://localhost:5001/api/register", {
+        const response = await fetch(`${SEVER_URL}/api/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
-
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 export default function MyOrder() {
 
     const [orderData, setorderData] = useState({})
 
     const fetchMyOrder = async () => {
-        await fetch("http://localhost:5001/api/myOrderData", {
+        await fetch(`${SERVER_URL}/api/myOrderData`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
