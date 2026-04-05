@@ -1,64 +1,58 @@
 import { useState, useRef, useEffect } from 'react'
 import { useDispatchCart, useCart } from './ContextReducer';
 
-export default function Card(props) {
+export default function Card({ foodItem, options }) {
 
-    let dispatch = useDispatchCart()
-    let data = useCart()
-    let priceRef = useRef()
+    const dispatch = useDispatchCart()
+    const cartData = useCart()
+    const priceRef = useRef(null)
 
-    let options = props.options
-    let priceOptions = Object.keys(options)
+    const priceOptions = Object.keys(options)
+    const defaultSize = priceOptions[0] || ""
     const [qty, setQty] = useState(1)
-    const [size, setSize] = useState("")
+    const [size, setSize] = useState(defaultSize)
 
     const handleAddToCart = async () => {
-        let food = []
-        for (const item of data) {
-            if (item.id == props.foodItem._id) {
-                food = item
-                break;
-            }
+        const existingItem = cartData.find((item) => item.id === foodItem._id && item.size === size)
+
+        if (existingItem) {
+            await dispatch({ type: "UPDATE", id: foodItem._id, size, price: finalPrice, qty })
+            return;
         }
-        if (food != []) {
-            if (food.size === size) {
-                await dispatch({ type: "UPDATE", id: props.foodItem._id, price: finalPrice, qty: qty })
-                return;
-            }
-        }
-        await dispatch({ type: "ADD", id: props.foodItem._id, name: props.foodItem.name, img: props.foodItem.img, price: finalPrice, qty: qty, size: size })
+        await dispatch({ type: "ADD", id: foodItem._id, name: foodItem.name, img: foodItem.img, price: finalPrice, qty, size })
     }
 
-    let finalPrice = qty * parseInt(options[size]);
+    const finalPrice = size && options[size] ? qty * parseInt(options[size], 10) : 0;
 
     useEffect(() => {
-        setSize(priceRef.current.value)
-    }, [])
+        if (priceRef.current) {
+            setSize(priceRef.current.value || defaultSize)
+        }
+    }, [defaultSize])
 
     return (
-        <div className="card mt-3" style={{ "width": "18rem", "height": "360px" }}>
-            <img src={props.foodItem.img} className="card-img-top" alt="No Image" style={{ height: "200px", objectFit: "fill" }} />
+        <div className="card menu-card h-100">
+            <img src={foodItem.img} className="card-img-top" alt={foodItem.name} />
             <div className="card-body">
-                <h5 className="card-title">{props.foodItem.name}</h5>
-                <div className="container w-100">
-                    <select className="m-2 h-100 bg-success rounded" onChange={(e) => setQty(e.target.value)}>
+                <h5 className="card-title">{foodItem.name}</h5>
+                <div className="menu-card-controls">
+                    <select className="form-select form-select-sm menu-card-select" value={qty} onChange={(e) => setQty(parseInt(e.target.value, 10))}>
                         {Array.from(Array(6), (e, i) => {
                             return (
                                 <option key={i + 1}>{i + 1}</option>
                             )
                         })}
                     </select>
-                    <select className="m-2 h-100 bg-success rounded" ref={priceRef} onChange={(e) => setSize(e.target.value)}>
+                    <select className="form-select form-select-sm menu-card-select" ref={priceRef} value={size} onChange={(e) => setSize(e.target.value)}>
                         {priceOptions.map((op) => {
                             return <option key={op} value={op}>{op}</option>
                         })}
                     </select>
-                    <div className="d-inline h-100 fs-5">
+                    <div className="menu-card-price">
                         ₹{finalPrice}/-
                     </div>
                 </div>
-                <hr />
-                <button className='btn btn-success mt-auto' onClick={handleAddToCart}>Add to Cart</button>
+                <button className='btn btn-success mt-auto w-100' onClick={handleAddToCart} disabled={!size}>Add to Cart</button>
             </div>
         </div>
     )

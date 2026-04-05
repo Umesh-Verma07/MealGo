@@ -2,13 +2,17 @@ import ReactDom from 'react-dom'
 
 const MODEL_STYLES = {
   position: 'fixed',
-  top: '50%',
-  left: '50%',
-  backgroundColor: 'rgb(34,34,34)',
+  inset: '50% auto auto 50%',
+  backgroundColor: 'rgba(255, 255, 255, 0.98)',
   transform: 'translate(-50%, -50%)',
-  zIndex: 1000,
-  height: '90%',
-  width: '90%'
+  zIndex: 1100,
+  height: 'min(88vh, 920px)',
+  width: 'min(94vw, 1100px)',
+  borderRadius: '28px',
+  overflow: 'hidden',
+  boxShadow: '0 28px 70px rgba(15, 23, 42, 0.28)',
+  display: 'flex',
+  flexDirection: 'column'
 }
 
 const OVERLAY_STYLES = {
@@ -17,18 +21,25 @@ const OVERLAY_STYLES = {
   left: 0,
   right: 0,
   bottom: 0,
-  backgroundColor: 'rgba(0, 0, 0, .7)',
-  zIndex: 1000
+  backgroundColor: 'rgba(12, 18, 16, 0.68)',
+  backdropFilter: 'blur(6px)',
+  zIndex: 1050
 }
 
 export default function Model({ children, onClose }) {
 
   return ReactDom.createPortal(
     <>
-      <div style={OVERLAY_STYLES} />
+      <div style={OVERLAY_STYLES} onClick={onClose} />
       <div style={MODEL_STYLES}>
-        <button className='btn bg-danger fs-4' style={{ marginLeft: "90%", marginTop: "-35px" }} onClick={onClose}> X </button>
-        {children}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '1rem 1rem 0 1rem' }}>
+          <button className='btn btn-sm btn-outline-secondary rounded-circle' style={{ width: '2.5rem', height: '2.5rem' }} onClick={onClose} aria-label="Close cart">
+            ×
+          </button>
+        </div>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 1rem 1rem' }}>
+          {children}
+        </div>
       </div>
     </>,
     document.getElementById('cart-root')

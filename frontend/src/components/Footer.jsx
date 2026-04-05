@@ -1,8 +1,8 @@
 import './Footer.css'
 export default function Footer() {
   return (
-    <div className="f-info m-auto">
-        <div className="f-info-socials">
+  <footer className="site-footer m-auto">
+    <div className="f-info-socials">
             <i className="fa-brands fa-square-facebook"></i>
             <i className="fa-brands fa-square-instagram"></i>
             <i className="fa-brands fa-linkedin"></i>
@@ -12,6 +12,6 @@ export default function Footer() {
             <a href="/">Privacy &nbsp;</a>
             <a href="/">Terms</a>
         </div>
-    </div>
+  </footer>
   )
 }

@@ -6,6 +6,7 @@ const { body, validationResult } = require('express-validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const jwtSecret = "IamUmeshKumarVemaIIITSonepatCSE202226"
+
 router.post('/register',
     [body('email').isEmail(),
     body('password', 'Incorrect Password').isLength({ min: 5 })],
@@ -17,7 +18,7 @@ router.post('/register',
         }
 
         const salt = await bcrypt.genSalt(10);
-        let secPassword = await bcrypt.hash(req.body.password, salt);
+        const secPassword = await bcrypt.hash(req.body.password, salt);
 
         try {
             const data = {
@@ -27,10 +28,14 @@ router.post('/register',
                 email: req.body.email,
             };
 
-            await User.create(data).then(res.json({ success: true }));
+            const createdUser = await User.create(data)
+            const tokenPayload = { user: { id: createdUser.id } }
+            const authToken = jwt.sign(tokenPayload, jwtSecret)
+
+            return res.status(201).json({ success: true, authToken });
         } catch (error) {
             console.log(error);
-            res.json({ success: false })
+            return res.status(500).json({ success: false })
         }
     })
 
@@ -45,10 +50,10 @@ router.post('/login',
             return res.status(400).json({ errors: errors.array() });
         }
 
-        let { email, password } = req.body;
+        const { email, password } = req.body;
 
         try {
-            let userData = await User.findOne({ email });
+            const userData = await User.findOne({ email });
             if (!userData) {
                 return res.status(400).json({ errors: "Email does not exist" });
             }
@@ -59,17 +64,17 @@ router.post('/login',
             }
 
             const data = {
-                user:{
+                user: {
                     id: userData.id
                 }
             }
 
             const authToken = jwt.sign(data, jwtSecret);
 
-            return res.json({ success: true, authToken: authToken});
+            return res.status(200).json({ success: true, authToken });
         } catch (error) {
             console.log(error);
-            res.json({ success: false })
+            return res.status(500).json({ success: false })
         }
     })
 

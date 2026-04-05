@@ -4,10 +4,10 @@ import Navbar from '../components/Navbar';
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 export default function MyOrder() {
 
-    const [orderData, setorderData] = useState({})
+    const [orderData, setOrderData] = useState(null)
 
     const fetchMyOrder = async () => {
-        await fetch(`${SERVER_URL}/api/myOrderData`, {
+        const response = await fetch(`${SERVER_URL}/api/myOrderData`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -15,72 +15,63 @@ export default function MyOrder() {
             body: JSON.stringify({
                 email: localStorage.getItem('userEmail')
             })
-        }).then(async (res) => {
-            let response = await res.json()
-            await setorderData(response)
         })
+
+        const payload = await response.json()
+        setOrderData(payload)
     }
 
     useEffect(() => {
         fetchMyOrder()
     }, [])
 
+    const orderGroups = orderData?.orderData?.order_data || []
+    const hasOrders = orderGroups.length > 0
+
     return (
         <div>
-            <div>
-                <Navbar />
-            </div>
+            <Navbar />
 
-            <div className='container'>
-                <div className='row'>
-
-                    {orderData != {} ? Array(orderData).map(data => {
-                        return (
-                            data.orderData ?
-                                data.orderData.order_data.slice(0).reverse().map((item) => {
-                                    return (
-                                        item.map((arrayData) => {
-                                            return (
-                                                <div  >
-                                                    {arrayData.Order_date ? <div className='m-auto mt-5'>
-
-                                                        {data = arrayData.Order_date}
-                                                        <hr />
-                                                    </div> :
-
-                                                        <div className='col-12 col-md-6 col-lg-3' >
-                                                            <div className="card mt-3" style={{ width: "16rem", maxHeight: "360px" }}>
-                                                                <img src={arrayData.img} className="card-img-top" alt="..." style={{ height: "120px", objectFit: "fill" }} />
-                                                                <div className="card-body">
-                                                                    <h5 className="card-title">{arrayData.name}</h5>
-                                                                    <div className='container w-100 p-0' style={{ height: "38px" }}>
-                                                                        <span className='m-1'>{arrayData.qty}</span>
-                                                                        <span className='m-1'>{arrayData.size}</span>
-                                                                        <span className='m-1'>{data}</span>
-                                                                        <div className=' d-inline ms-2 h-100 w-20 fs-5' >
-                                                                            ₹{arrayData.price}/-
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                        </div>
-
-
-
-                                                    }
-
-                                                </div>
-                                            )
-                                        })
-
-                                    )
-                                }) : <div className='mt-5 text-center'><h1>No Order History</h1></div>
-                        )
-                    }) :""}
+            <div className='container order-shell'>
+                <div className='order-header'>
+                    <div>
+                        <p className='menu-section-meta'>Account activity</p>
+                        <h1>My Orders</h1>
+                    </div>
+                    <p className='menu-section-meta mb-0'>Track every meal you have already placed.</p>
                 </div>
 
+                {hasOrders ? orderGroups.slice().reverse().map((group, groupIndex) => {
+                    // Each group stores one order date marker plus item objects.
+                    const orderDate = group.find((entry) => entry.Order_date)?.Order_date || 'Order placed'
+                    const items = group.filter((entry) => !entry.Order_date)
 
+                    return (
+                        <section key={`${orderDate}-${groupIndex}`} className='order-group'>
+                            <div className='order-date'>{orderDate}</div>
+                            <div className='order-grid'>
+                                {items.map((arrayData, itemIndex) => (
+                                    <article key={`${arrayData.name}-${itemIndex}`} className='card order-item-card h-100'>
+                                        <img src={arrayData.img} className="card-img-top" alt={arrayData.name} />
+                                        <div className="card-body">
+                                            <h5 className="card-title">{arrayData.name}</h5>
+                                            <div className='d-flex flex-wrap gap-2 align-items-center text-secondary-emphasis'>
+                                                <span className='badge text-bg-light border'>Qty {arrayData.qty}</span>
+                                                <span className='badge text-bg-light border'>{arrayData.size}</span>
+                                                <span className='badge text-bg-light border'>₹{arrayData.price}/-</span>
+                                            </div>
+                                        </div>
+                                    </article>
+                                ))}
+                            </div>
+                        </section>
+                    )
+                }) : (
+                    <div className='order-empty'>
+                        <h2 className='mb-2'>No order history yet</h2>
+                        <p className='mb-0'>Once you place an order, it will appear here with the date and item breakdown.</p>
+                    </div>
+                )}
             </div>
 
             <Footer />

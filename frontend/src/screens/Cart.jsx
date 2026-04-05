@@ -4,19 +4,22 @@ import { useCart, useDispatchCart } from '../components/ContextReducer';
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
 export default function Cart() {
-  let data = useCart();
-  let dispatch = useDispatchCart();
+  const data = useCart();
+  const dispatch = useDispatchCart();
   if (data.length === 0) {
     return (
-      <div>
-        <div className='m-5 w-100 text-center fs-3 text-white'>The Cart is Empty!</div>
+      <div className='cart-shell'>
+        <div className='empty-state m-2'>
+          <h2 className='mb-2'>The cart is empty</h2>
+          <p className='mb-0'>Add meals from the menu to see them here.</p>
+        </div>
       </div>
     )
   }
 
   const handleCheckOut = async () => {
-    let userEmail = localStorage.getItem("userEmail");
-    let response = await fetch(`${SERVER_URL}/api/orderData`, {
+    const userEmail = localStorage.getItem("userEmail");
+    const response = await fetch(`${SERVER_URL}/api/orderData`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -28,17 +31,18 @@ export default function Cart() {
       })
     });
 
-    if (response.status == 200) {
+    if (response.status === 200) {
       dispatch({ type: "DROP" })
     }
   }
 
-  let totalPrice = data.reduce((total, food) => total + food.price, 0)
+  const totalPrice = data.reduce((total, food) => total + food.price, 0)
   return (
     <>
-      <div className='container m-auto mt-5 table-responsive  table-responsive-sm table-responsive-md' >
-        <table className='table table-hover '>
-          <thead className=' text-success fs-4'>
+      <div className='cart-shell'>
+        <div className='table-responsive'>
+        <table className='table table-hover align-middle'>
+          <thead className='fs-5'>
             <tr>
               <th scope='col' >#</th>
               <th scope='col' >Name</th>
@@ -50,20 +54,24 @@ export default function Cart() {
           </thead>
           <tbody>
             {data.map((food, index) => (
-              <tr>
+              <tr key={`${food.id}-${food.size}-${index}`}>
                 <th scope='row' >{index + 1}</th>
                 <td >{food.name}</td>
                 <td>{food.qty}</td>
                 <td>{food.size}</td>
                 <td>{food.price}</td>
-                 <td ><button type="button" className="btn p-0"><Delete onClick={() => { dispatch({ type: "REMOVE", index: index }) }} /></button> </td>
+                 <td ><button type="button" className="btn p-0 text-danger" aria-label={`Remove ${food.name}`}><Delete onClick={() => { dispatch({ type: "REMOVE", index }) }} /></button> </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div><h1 className='fs-2 text-white'>Total Price: ₹{totalPrice}/-</h1></div>
-        <div>
-          <button className='btn bg-success mt-5 ' onClick={handleCheckOut} > Check Out </button>
+        </div>
+        <div className='cart-summary'>
+          <div>
+            <p className='mb-1 text-uppercase fw-semibold small text-secondary-emphasis'>Total price</p>
+            <h2 className='fs-2'>₹{totalPrice}/-</h2>
+          </div>
+          <button className='btn btn-success px-4' onClick={handleCheckOut} > Check Out </button>
         </div>
       </div>
     </>

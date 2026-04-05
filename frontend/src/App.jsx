@@ -10,7 +10,7 @@ function App() {
   return (
     <CartProvider>
       <Router>
-        <div>
+        <div className="app-shell">
           <Routes>
             <Route exact path="/" element={<Home />} />
             <Route exact path="/login" element={<Login />} />
